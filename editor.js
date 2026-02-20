@@ -5,7 +5,7 @@ const blockSize = 50; // Matched to Game TILE size
 let cameraX = 0;
 let currentTool = "block";
 let currentLevelName = null;
-const STORAGE_KEY = "FD_LEVELS";
+const STORAGE_KEY = "FD_LEVELS_V2";
 
 let levelData = { name:"", blocks: [] };
 
@@ -119,4 +119,5 @@ function loadLevel(){
 function newLevel(){
     currentLevelName = null;
     levelData = { name: "", blocks: [] };
+
 }
