@@ -1,37 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Global Leaderboards</title>
+    <meta charset="UTF-8">
+    <title>Future Dash - Global Leaderboard</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://download.playfab.com/sdk/PlayFabClientApi.js"></script>
 </head>
-<body style="background: #111; color: white; text-align: center;">
+<body style="background: #0a0a0a; color: white; font-family: Arial, sans-serif; text-align: center; padding-top: 50px;">
+
     <h1>GLOBAL TOP 10</h1>
-    <div id="lbList" style="max-width: 400px; margin: auto;">Loading Azure Scores...</div>
-    <button onclick="window.location.href='index.html'">Menu</button>
+    <h2 id="levelTitle">Level: General</h2>
+
+    <div id="lbContainer" style="background: #1a1a1a; max-width: 500px; margin: 20px auto; padding: 20px; border-radius: 10px; border: 1px solid #333;">
+        <div id="lbList">Loading Azure Scores...</div>
+    </div>
+
+    <button onclick="window.location.href='index.html'" style="padding: 10px 20px; cursor: pointer;">Back to Menu</button>
 
     <script>
+        // 2. CONFIGURATION
         PlayFab.settings.titleId = "114A51";
+
         function loadScores() {
-            const level = localStorage.getItem("currentLevelName") || "General";
-            const request = { StatisticName: level, StartPosition: 0, MaxResultsCount: 10 };
+            const listElement = document.getElementById("lbList");
+            const levelName = localStorage.getItem("currentLevelName") || "General";
+            document.getElementById("levelTitle").innerText = "Level: " + levelName;
+
+            // 3. THE REQUEST
+            const request = {
+                StatisticName: levelName,
+                StartPosition: 0,
+                MaxResultsCount: 10
+            };
+
+            console.log("Fetching scores for:", levelName);
 
             PlayFabClientSDK.GetLeaderboard(request, (result, error) => {
-                const list = document.getElementById("lbList");
                 if (result) {
-                    list.innerHTML = result.data.Leaderboard.map(entry => `
-                        <div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding:10px;">
-                            <span>${entry.Position + 1}. ${entry.DisplayName || "Player"}</span>
-                            <span style="color:gold;">${(entry.StatValue / 100).toFixed(2)}s</span>
-                        </div>
-                    `).join("");
+                    const data = result.data.Leaderboard;
+                    
+                    if (data.length === 0) {
+                        listElement.innerHTML = "<p style='color: #888;'>No scores found yet. Be the first!</p>";
+                        return;
+                    }
+
+                    // 4. RENDER THE TABLE
+                    let html = `<table style="width: 100%; border-collapse: collapse;">
+                                    <tr style="border-bottom: 2px solid #333;">
+                                        <th style="padding: 10px; text-align: left;">#</th>
+                                        <th style="padding: 10px; text-align: left;">PLAYER</th>
+                                        <th style="padding: 10px; text-align: right;">TIME</th>
+                                    </tr>`;
+
+                    data.forEach(entry => {
+                        // Convert integer back to decimal (1055 -> 10.55)
+                        const formattedTime = (entry.StatValue / 100).toFixed(2);
+                        const name = entry.DisplayName || entry.PlayFabId; // Fallback to ID if no name
+                        
+                        html += `<tr>
+                                    <td style="padding: 10px; text-align: left;">${entry.Position + 1}</td>
+                                    <td style="padding: 10px; text-align: left;">${name}</td>
+                                    <td style="padding: 10px; text-align: right; color: gold;">${formattedTime}s</td>
+                                 </tr>`;
+                    });
+
+                    html += "</table>";
+                    listElement.innerHTML = html;
                 } else {
-                    list.innerHTML = "No scores found for this level.";
+                    // 5. ERROR HANDLING
+                    console.error("PlayFab Error:", error);
+                    listElement.innerHTML = `<p style="color: #ff4444;">Azure Error: ${error.errorMessage}</p>`;
                 }
             });
         }
-        loadScores();
+
+        // Run on load
+        if (typeof PlayFabClientSDK !== 'undefined') {
+            loadScores();
+        } else {
+            document.getElementById("lbList").innerHTML = "Error: PlayFab SDK failed to load.";
+        }
     </script>
 </body>
 </html>
-
