@@ -1,35 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Future Dash - Settings</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://download.playfab.com/sdk/PlayFabClientApi.js"></script>
-    <style>
-        .color-opt { width: 50px; height: 50px; cursor: pointer; display: inline-block; margin: 10px; border: 2px solid white; }
-    </style>
 </head>
-<body style="background: black; color: white; text-align: center; padding-top: 50px;">
-    <h1>CLOUD SETTINGS</h1>
-    <p>Choose your player color (Synced to Cloud):</p>
-    <div class="color-opt" style="background: #67ffff;" onclick="saveColor('#67ffff')"></div>
-    <div class="color-opt" style="background: #ff4747;" onclick="saveColor('#ff4747')"></div>
-    <div class="color-opt" style="background: #00ffcc;" onclick="saveColor('#00ffcc')"></div>
-    <div class="color-opt" style="background: #ffcc00;" onclick="saveColor('#ffcc00')"></div>
-    <br><br>
-    <button onclick="window.location.href='index.html'">Back to Menu</button>
-
+<body style="background:black; color:white; text-align:center;">
+    <h1>SELECT COLOR</h1>
+    <button onclick="saveColor('#ff0000')">RED</button>
+    <button onclick="saveColor('#00ff00')">GREEN</button>
+    <button onclick="saveColor('#67ffff')">BLUE</button>
     <script>
         PlayFab.settings.titleId = "114A51";
-        function saveColor(color) {
-            localStorage.setItem("temp_playerColor", color);
-            if (localStorage.getItem("loggedInUser")) {
-                const request = { Data: { "playerColor": color } };
-                PlayFabClientSDK.UpdateUserData(request, (result, error) => {
-                    if (result) alert("Color synced to Azure!");
-                });
-            } else {
-                alert("Color saved locally (Log in to sync!)");
-            }
+        function saveColor(c) {
+            localStorage.setItem("temp_playerColor", c);
+            PlayFabClientSDK.UpdateUserData({ Data: { "playerColor": c } }, () => alert("Cloud Synced!"));
         }
     </script>
 </body>
