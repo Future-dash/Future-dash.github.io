@@ -1,63 +1,29 @@
 PlayFab.settings.titleId = "114A51";
 
-// Create a new account in the Cloud
 function register() {
     const u = document.getElementById("username").value.trim();
     const p = document.getElementById("password").value.trim();
-    
-    if (p.length < 6) {
-        alert("Password must be at least 6 characters.");
-        return;
-    }
+    if (p.length < 6) return alert("Password must be 6+ chars.");
 
-    const registerRequest = {
-        Email: u + "@futuredash.com",
-        Password: p,
-        Username: u,
-        DisplayName: u
-    };
-
-    PlayFabClientSDK.RegisterPlayFabUser(registerRequest, (result, error) => {
-        if (result) {
-            alert("Account created in Azure! You can now login on any computer.");
-        } else {
-            alert("Registration failed: " + error.errorMessage);
-        }
+    const request = { Email: u + "@futuredash.com", Password: p, Username: u, DisplayName: u };
+    PlayFabClientSDK.RegisterPlayFabUser(request, (result, error) => {
+        if (result) alert("Account Created! Now Login.");
+        else alert("Error: " + error.errorMessage);
     });
 }
 
-// Log in and pull user preferences (like color)
 function login() {
     const u = document.getElementById("username").value.trim();
     const p = document.getElementById("password").value.trim();
 
-    const loginRequest = {
-        TitleId: PlayFab.settings.titleId,
-        Email: u + "@futuredash.com",
-        Password: p
-    };
-
-    PlayFabClientSDK.LoginWithEmailAddress(loginRequest, (result, error) => {
+    const request = { TitleId: PlayFab.settings.titleId, Email: u + "@futuredash.com", Password: p };
+    PlayFabClientSDK.LoginWithEmailAddress(request, (result, error) => {
         if (result) {
             localStorage.setItem("loggedInUser", u);
-            localStorage.setItem("playfabId", result.data.PlayFabId);
-            
-            // Get the player's saved color from the Cloud
-            PlayFabClientSDK.GetUserData({}, (userData, userError) => {
-                if (userData && userData.data.Data["playerColor"]) {
-                    localStorage.setItem("temp_playerColor", userData.data.Data["playerColor"].Value);
-                }
+            PlayFabClientSDK.GetUserData({}, (res) => {
+                if (res.data.Data["playerColor"]) localStorage.setItem("temp_playerColor", res.data.Data["playerColor"].Value);
                 window.location.href = "index.html";
             });
-        } else {
-            alert("Login failed: " + error.errorMessage);
-        }
+        } else alert("Login Failed: " + error.errorMessage);
     });
-}
-
-function logout() {
-    localStorage.removeItem("loggedInUser");
-    localStorage.removeItem("playfabId");
-    localStorage.removeItem("temp_playerColor");
-    window.location.href = "index.html";
 }
