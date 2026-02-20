@@ -1,4 +1,4 @@
-const STORAGE_KEY = "FD_LEVELS";
+const STORAGE_KEY = "FD_LEVELS_V2";
 const levelList = document.getElementById("levelList");
 
 function loadLevels() {
@@ -48,5 +48,6 @@ function loadLevels() {
         levelList.appendChild(container);
     });
 }
+
 
 loadLevels();
